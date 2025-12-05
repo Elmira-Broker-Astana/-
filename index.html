@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эльмира Брокер | Ипотека в Астане</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .font-elegant { font-family: 'Playfair Display', serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .glass-effect { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        const { useState, useEffect } = React;
+
+        const translations = {
+            ru: {
+                title: "Ипотека в Астане",
+                subtitle: "за 2 часа",
+                features: [
+                    "без подтверждения дохода",
+                    "первоначальный взнос 20%",
+                    "Работаем с застройщиками напрямую"
+                ],
+                formTitle: "Анкета для ипотечного брокера",
+                fields: {
+                    fullName: "ФИО",
+                    city: "Город",
+                    hasDownPayment: "Наличие первоначального взноса (20%)",
+                    yes: "Да",
+                    no: "Нет",
+                    hadDelays: "Были ли просрочки за последние 24 месяца?",
+                    isEmployed: "Официально трудоустроены?",
+                    employed: "Трудоустроен",
+                    unemployed: "Не трудоустроен"
+                },
+                submitBtn: "Отправить заявку ипотечному брокеру",
+                brand: "Эльмира Брокер · Астана",
+                whatsappFixed: "Написать в WhatsApp",
+                phone: "+7 747 681 34 54",
+                language: "Қаз",
+                requiredField: "Обязательное поле",
+                success: "Заявка отправлена!",
+                formInfo: "Заполните анкету — мы проверим возможность одобрения за 2 часа",
+                privacy: "Нажимая кнопку, вы соглашаетесь на обработку персональных данных"
+            },
+            kz: {
+                title: "Астанада ипотека",
+                subtitle: "2 сағатта",
+                features: [
+                    "табысты растаусыз",
+                    "бастапқы төлем 20%",
+                    "Құрылыс компанияларымен тікелей жұмыс істейміз"
+                ],
+                formTitle: "Ипотекалық брокерге анкета",
+                fields: {
+                    fullName: "Аты-жөні",
+                    city: "Қала",
+                    hasDownPayment: "Бастапқы төлем бар ма? (20%)",
+                    yes: "Иә",
+                    no: "Жоқ",
+                    hadDelays: "Соңғы 24 айда кешігулер болды ма?",
+                    isEmployed: "Ресми жұмысқа орналасқансыз ба?",
+                    employed: "Жұмыс істеймін",
+                    unemployed: "Жұмыс істемеймін"
+                },
+                submitBtn: "Ипотекалық брокерге өтініш жіберу",
+                brand: "Эльмира Брокер · Астана",
+                whatsappFixed: "WhatsApp-пен жазу",
+                phone: "+7 747 681 34 54",
+                language: "Рус",
+                requiredField: "Міндетті өріс",
+                success: "Өтініш жіберілді!",
+                formInfo: "Анкетаны толтырыңыз — біз 2 сағат ішінде бекіту мүмкіндігін тексереміз",
+                privacy: "Батырманы басу арқылы сіз жеке деректерді өңдеуге келісіңіз"
+            }
+        };
+
+        function MortgageLanding() {
+            const [language, setLanguage] = useState('ru');
+            const t = translations[language];
+            
+            const [formData, setFormData] = useState({
+                fullName: '',
+                city: '',
+                hasDownPayment: null,
+                hadDelays: null,
+                isEmployed: null
+            });
+            
+            const [sending, setSending] = useState(false);
+            const WA_NUMBER = "77476813454"; // Обновленный номер без +
+
+            const handleInputChange = (field, value) => {
+                setFormData(prev => ({ ...prev, [field]: value }));
+            };
+
+            const validateForm = () => {
+                const { fullName, city, hasDownPayment, hadDelays, isEmployed } = formData;
+                return fullName.trim() && city.trim() && 
+                       hasDownPayment !== null && 
+                       hadDelays !== null && 
+                       isEmployed !== null;
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                if (!validateForm()) {
+                    alert(language === 'ru' ? 'Заполните все обязательные поля' : 'Барлық міндетті өрістерді толтырыңыз');
+                    return;
+                }
+
+                setSending(true);
+                
+                const message = language === 'ru' 
+                    ? `📋 Новая заявка на ипотеку\n\n` +
+                      `👤 ФИО: ${formData.fullName}\n` +
+                      `🏙️ Город: ${formData.city}\n` +
+                      `💰 Первоначальный взнос: ${formData.hasDownPayment ? 'ДА (20%)' : 'НЕТ'}\n` +
+                      `⏰ Просрочки за 24 месяца: ${formData.hadDelays ? 'ДА' : 'НЕТ'}\n` +
+                      `💼 Трудоустройство: ${formData.isEmployed ? 'Официально' : 'Не трудоустроен'}\n\n` +
+                      `📱 WhatsApp: ${t.phone}\n` +
+                      `🌐 Язык: ${language === 'ru' ? 'Русский' : 'Казахский'}`
+                    : `📋 Ипотекаға жаңа өтініш\n\n` +
+                      `👤 Аты-жөні: ${formData.fullName}\n` +
+                      `🏙️ Қала: ${formData.city}\n` +
+                      `💰 Бастапқы төлем: ${formData.hasDownPayment ? 'ИӘ (20%)' : 'ЖОҚ'}\n` +
+                      `⏰ Соңғы 24 айда кешігулер: ${formData.hadDelays ? 'ИӘ' : 'ЖОҚ'}\n` +
+                      `💼 Жұмыс: ${formData.isEmployed ? 'Ресми жұмыс' : 'Жұмыс істемейді'}\n\n` +
+                      `📱 WhatsApp: ${t.phone}\n` +
+                      `🌐 Тіл: ${language === 'ru' ? 'Орысша' : 'Қазақша'}`;
+
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappUrl = `https://wa.me/${WA_NUMBER}?text=${encodedMessage}`;
+                
+                window.open(whatsappUrl, '_blank');
+                
+                setTimeout(() => {
+                    setSending(false);
+                    setFormData({
+                        fullName: '',
+                        city: '',
+                        hasDownPayment: null,
+                        hadDelays: null,
+                        isEmployed: null
+                    });
+                }, 1000);
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+                    {/* Fixed WhatsApp Button */}
+                    <a 
+                        href={`https://wa.me/${WA_NUMBER}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-full shadow-xl hover-lift glass-effect"
+                    >
+                        <img src="/whatsapp-icon.png" alt="WhatsApp" className="w-6 h-6" />
+                        <span className="font-medium hidden sm:inline">{t.whatsappFixed}</span>
+                    </a>
+
+                    {/* Language Switcher */}
+                    <div className="absolute top-4 right-4 z-10">
+                        <button
+                            onClick={() => setLanguage(language === 'ru' ? 'kz' : 'ru')}
+                            className="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm font-medium text-gray-700 hover:bg-white transition-all shadow-sm hover-lift"
+                        >
+                            {t.language}
+                        </button>
+                    </div>
+
+                    {/* Header */}
+                    <header className="gradient-bg text-white py-8 px-6 rounded-b-3xl shadow-lg">
+                        <div className="max-w-4xl mx-auto text-center">
+                            <div className="mb-6">
+                                <h1 className="font-elegant text-4xl md:text-5xl font-bold mb-2">
+                                    {t.title}
+                                </h1>
+                                <div className="text-2xl font-semibold text-blue-100">{t.subtitle}</div>
+                            </div>
+                            
+                            <div className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8 mb-8">
+                                {t.features.map((feature, index) => (
+                                    <div key={index} className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
+                                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                                        <span>{feature}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="text-center">
+                                <div className="font-elegant text-3xl font-bold tracking-wide mb-2">
+                                    ЭЛЬМИРА БРОКЕР
+                                </div>
+                                <div className="text-xl opacity-90">АСТАНА</div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <main className="max-w-4xl mx-auto px-4 py-12">
+                        {/* Hero Image */}
+                        <div className="mb-12 rounded-2xl overflow-hidden shadow-2xl hover-lift">
+                            <img 
+                                src="/assets/bi-preview.png" 
+                                alt="Новостройки Астаны" 
+                                className="w-full h-64 object-cover"
+                            />
+                        </div>
+
+                        {/* Form Section */}
+                        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                            <div className="text-center mb-8">
+                                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">{t.formTitle}</h2>
+                                <p className="text-gray-600">{t.formInfo}</p>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                {/* Full Name */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        {t.fields.fullName} *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.fullName}
+                                        onChange={(e) => handleInputChange('fullName', e.target.value)}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                        placeholder={language === 'ru' ? "Иванов Иван Иванович" : "Иванов Иван Иванович"}
+                                    />
+                                </div>
+
+                                {/* City */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        {t.fields.city} *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.city}
+                                        onChange={(e) => handleInputChange('city', e.target.value)}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                        placeholder={language === 'ru' ? "Астана" : "Астана"}
+                                    />
+                                </div>
+
+                                {/* Down Payment */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        {t.fields.hasDownPayment} *
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[true, false].map((value) => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                onClick={() => handleInputChange('hasDownPayment', value)}
+                                                className={`py-3 rounded-xl border-2 transition-all ${
+                                                    formData.hasDownPayment === value
+                                                        ? 'border-green-500 bg-green-50 text-green-700'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                }`}
+                                            >
+                                                {value ? t.fields.yes : t.fields.no}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Delays */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        {t.fields.hadDelays} *
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[true, false].map((value) => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                onClick={() => handleInputChange('hadDelays', value)}
+                                                className={`py-3 rounded-xl border-2 transition-all ${
+                                                    formData.hadDelays === value
+                                                        ? value
+                                                            ? 'border-red-500 bg-red-50 text-red-700'
+                                                            : 'border-green-500 bg-green-50 text-green-700'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                }`}
+                                            >
+                                                {value ? t.fields.yes : t.fields.no}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Employment */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        {t.fields.isEmployed} *
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[true, false].map((value) => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                onClick={() => handleInputChange('isEmployed', value)}
+                                                className={`py-3 rounded-xl border-2 transition-all ${
+                                                    formData.isEmployed === value
+                                                        ? value
+                                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                                            : 'border-yellow-500 bg-yellow-50 text-yellow-700'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                }`}
+                                            >
+                                                {value ? t.fields.employed : t.fields.unemployed}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Submit Button */}
+                                <button
+                                    type="submit"
+                                    disabled={sending || !validateForm()}
+                                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
+                                        sending || !validateForm()
+                                            ? 'bg-gray-300 cursor-not-allowed'
+                                            : 'gradient-bg hover-lift text-white shadow-lg'
+                                    }`}
+                                >
+                                    {sending 
+                                        ? (language === 'ru' ? 'Отправка...' : 'Жіберілуде...') 
+                                        : t.submitBtn}
+                                </button>
+
+                                <p className="text-center text-sm text-gray-500 mt-4">
+                                    {t.privacy}
+                                </p>
+                            </form>
+                        </div>
+
+                        {/* Contact Info */}
+                        <div className="mt-12 text-center">
+                            <div className="inline-flex items-center gap-4 bg-white/80 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg">
+                                <div className="text-left">
+                                    <div className="font-elegant text-xl font-bold text-gray-800">Эльмира Брокер</div>
+                                    <div className="text-gray-600">Астана</div>
+                                </div>
+                                <div className="h-12 w-px bg-gray-300"></div>
+                                <div className="text-right">
+                                    <div className="text-sm text-gray-500">{language === 'ru' ? 'Телефон' : 'Телефон'}</div>
+                                    <div className="text-lg font-bold text-gray-800">+7 747 681 34 54</div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-900 text-white py-8 mt-12">
+                        <div className="max-w-4xl mx-auto px-4 text-center">
+                            <div className="font-elegant text-2xl mb-4">Эльмира Брокер</div>
+                            <p className="text-gray-400 mb-2">{language === 'ru' ? 'Ипотечный брокер в Астане' : 'Астанадағы ипотекалық брокер'}</p>
+                            <p className="text-gray-500 text-sm">
+                                {language === 'ru' 
+                                    ? 'Работаем со всеми банками Казахстана' 
+                                    : 'Қазақстанның барлық банктерімен жұмыс істейміз'}
+                            </p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MortgageLanding />);
+    </script>
+</body>
+</html>
